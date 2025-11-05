@@ -1,0 +1,27 @@
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.log
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# OS and IDE files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Model and data artifacts
+*.joblib
+*.pickle
+models/
+data/
+
+# Jupyter/Notebook caches
+.ipynb_checkpoints/

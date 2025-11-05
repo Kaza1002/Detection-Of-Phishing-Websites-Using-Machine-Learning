@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Check Url • Phishing URL Quick-Check</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg:#0f6d6d;
+      --panel:#0e7f7f;
+      --card: rgba(255,255,255,.06);
+      --ink:#ffffff;
+      --ink-dim: rgba(255,255,255,.85);
+      --good:#1db954;
+      --bad:#ff5252;
+      --muted: rgba(255,255,255,.35);
+      --chip: rgba(255,255,255,.12);
+      --focus: #ffe27a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; color:var(--ink); background:linear-gradient(180deg,var(--bg),var(--panel));
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    .wrap{max-width:920px; margin:48px auto; padding:0 16px}
+    .card{
+      background:var(--card); border-radius:16px; padding:24px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.25);
+      backdrop-filter: blur(4px);
+    }
+    h1{
+      margin:0 0 8px; text-align:center; letter-spacing:.3px;
+    }
+    p.sub{margin:0 0 18px; text-align:center; color:var(--ink-dim); font-size:14px}
+    form{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:center}
+    input[type="text"]{
+      flex:1 1 520px; min-width:260px; height:46px;
+      border-radius:12px; border:1px solid transparent;
+      padding:10px 14px; font-size:16px; outline:none;
+    }
+    input[type="text"]:focus{border-color:var(--focus); box-shadow:0 0 0 3px rgba(255,226,122,.25)}
+    .btn{
+      height:46px; padding:0 18px; border-radius:12px; border:none; cursor:pointer;
+      background:#fff; color:#0f6d6d; font-weight:700; letter-spacing:.3px;
+    }
+    .grid{display:grid; grid-template-columns:1fr; gap:16px; margin-top:18px}
+    @media(min-width:800px){ .grid{grid-template-columns: 1.1fr .9fr} }
+
+    /* Status banner */
+    .status{
+      border-radius:14px; padding:16px; display:flex; align-items:center; gap:12px;
+      background:rgba(255,255,255,.12);
+    }
+    .status.good{ border:2px solid var(--good); }
+    .status.bad{  border:2px solid var(--bad);  }
+    .badge{
+      font-weight:800; padding:6px 10px; border-radius:999px; font-size:13px;
+      background:var(--chip);
+    }
+    .badge.good{ background:rgba(29,185,84,.18); border:1px solid var(--good); color:#d6ffdf; }
+    .badge.bad{  background:rgba(255,82,82,.18); border:1px solid var(--bad);  color:#ffdede; }
+
+    .kv{display:flex; gap:14px; flex-wrap:wrap; margin-left:auto}
+    .kv .pill{
+      background:var(--chip); padding:6px 10px; border-radius:999px; font-size:13px;
+    }
+
+    /* Progress */
+    .meter{height:10px; border-radius:999px; background:rgba(255,255,255,.17); overflow:hidden}
+    .bar{height:100%; width:0%;}
+    .bar.good{ background:linear-gradient(90deg,#29d36f,#1db954); }
+    .bar.bad{  background:linear-gradient(90deg,#ff7b7b,#ff5252); }
+
+    /* Cues list */
+    .cues{display:flex; flex-wrap:wrap; gap:8px}
+    .chip{background:var(--chip); padding:6px 10px; border-radius:999px; font-size:13px}
+    .muted{color:var(--muted)}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+
+    footer{margin-top:18px; color:var(--muted); font-size:13px; text-align:center}
+    .hint{font-size:13px; color:var(--ink-dim)}
+    .panel{background:var(--card); border-radius:14px; padding:16px}
+    .urlbox{word-break:break-all}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Check Url</h1>
+      <p class="sub">Checks for suspicious URLs using ML model.</p>
+
+      <form action="/" method="POST">
+        <input type="text" id="url" name="url" placeholder="Paste a URL (e.g. https://example.com/login)" required>
+        <button class="btn" type="submit">Check</button>
+      </form>
+
+      {% if status %}
+      <div class="grid">
+        <!-- Left: Status -->
+        <div class="panel">
+          <div class="status {{ status }}">
+            <div class="badge {{ status }}">{{ label_text }}</div>
+            <div>
+              <div class="hint">Confidence in this result</div>
+              <div class="meter" style="margin-top:6px;">
+                <div class="bar {{ status }}" style="width: {{ confidence }}%;"></div>
+              </div>
+            </div>
+            <div class="kv">
+              <div class="pill mono">Good: {{ prob_good }}%</div>
+              <div class="pill mono">Bad: {{ prob_bad }}%</div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px">
+            <div class="hint">Checked URL</div>
+            <div class="urlbox mono" style="margin-top:6px">{{ input_url }}</div>
+          </div>
+        </div>
+
+        <!-- Right: Explanation -->
+        <div class="panel">
+          {% if cues and status == 'bad' %}
+            <div class="hint">Phishy cues spotted (stems present in URL):</div>
+            <div class="cues" style="margin-top:8px">
+              {% for c in cues %}
+                <div class="chip mono">{{ c.token }} <span style="opacity:.8; font-size:11px; margin-left:6px">({{ "%.2f"|format(c.weight) }})</span></div>
+
+              {% endfor %}
+            </div>
+          {% elif cues %}
+            <div class="hint">Benign cues (tokens that pushed toward GOOD):</div>
+            <div class="cues" style="margin-top:8px">
+              {% for c in cues %}
+                <div class="chip mono">{{ c.token }}</div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="hint">No notable token cues were found in this URL.</div>
+          {% endif %}
+
+          <div style="margin-top:14px">
+            <div class="hint">Tips</div>
+            <ul style="margin:6px 0 0 18px; line-height:1.5">
+              <li>Verify the domain (look closely for look-alikes like <span class="mono">paypaI.com</span> with a capital “i”).</li>
+              <li>Be careful with shortened or excessively long URLs.</li>
+              <li>Never enter credentials after following links from unsolicited messages.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if not status and flash_msg %}
+        <p class="hint" style="margin-top:12px">{{ flash_msg }}</p>
+      {% endif %}
+
+      <footer>
+        Simple demo — model trained on a local CSV; do not use for real security decisions.
+      </footer>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,34 @@
+# train_and_save.py  (run once)
+import pandas as pd
+from pathlib import Path
+from nltk import RegexpTokenizer
+from nltk.stem.snowball import SnowballStemmer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.linear_model import LogisticRegression
+import joblib
+
+CSV_PATH = Path("phishing_site_urls.csv")
+data = pd.read_csv(CSV_PATH)
+
+data["Label"] = data["Label"].apply(lambda x: 1 if str(x).lower() == "good" else 0)
+
+tokenizer = RegexpTokenizer(r"[A-Za-z]+")
+stemmer = SnowballStemmer("english")
+
+def stem_text(s: str) -> str:
+    return " ".join(stemmer.stem(t) for t in tokenizer.tokenize(str(s)))
+
+data["Text"] = data["URL"].astype(str).apply(stem_text)
+
+X = data["Text"].tolist()
+y = data["Label"]
+
+vect = CountVectorizer()
+Xv = vect.fit_transform(X)
+
+model = LogisticRegression(max_iter=2000)
+model.fit(Xv, y)
+
+joblib.dump(vect, "vect.joblib")
+joblib.dump(model, "model.joblib")
+print("Saved vect.joblib and model.joblib")
