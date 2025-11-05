@@ -25,3 +25,5 @@ data/
 
 # Jupyter/Notebook caches
 .ipynb_checkpoints/
+
+/.github/
