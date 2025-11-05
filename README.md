@@ -21,7 +21,7 @@ Serve as an educational tool to raise phishing awareness.
 
 # 3. Methodology
 
-Data Preparation
+Data Preparation:
 
 Dataset: phishing_site_urls.csv containing labeled URLs as “good” or “bad.”
 
@@ -31,7 +31,7 @@ Stemming: Tokens are normalized using SnowballStemmer to reduce redundancy.
 
 Feature Extraction: CountVectorizer converts processed text into numerical vectors for model input.
 
-Model Development
+Model Development:
 
 Algorithm: Logistic Regression, chosen for its interpretability and efficiency.
 
@@ -41,7 +41,7 @@ Evaluation: Achieved strong accuracy and recall on test data.
 
 Persistence: Trained artifacts (model.joblib and vect.joblib) saved using Joblib for fast loading.
 
-Web Application
+Web Application:
 
 Framework: Flask
 
@@ -55,7 +55,8 @@ The ML model predicts if the URL is Good or Bad.
 
 Results are shown with confidence scores, cues, and safety recommendations.
 
-4. Skills
+
+# 4. Skills
 
 Programming: Python, HTML, CSS, Flask
 
@@ -97,29 +98,26 @@ Add user analytics and API endpoints for automated integrations.
 
 Implement continuous retraining with live data streams.
 
-
+<!--
 # 7. How to Run Locally
+
 Prerequisites
-
 Python 3.8 or higher
-
 Flask, Pandas, Scikit-learn, NLTK, Joblib
 
 Steps
 # Clone the repository
-git clone https://github.com/Kaza1002/Detection-Of-Phishing-Websites-Using-Machine-Learning-.git
+git clone https://github.com/...
 cd Detection-Of-Phishing-Websites-Using-Machine-Learning-
 
 # Create and activate a virtual environment
 python -m venv .venv
-.venv\Scripts\activate        # For Windows
-# source .venv/bin/activate   # For macOS/Linux
+.venv\Scripts\activate        # Windows
+# source .venv/bin/activate   # macOS/Linux
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Run the Flask app
 python app.py
-
-# Visit the app in your browser
-http://127.0.0.1:5000
+-->
